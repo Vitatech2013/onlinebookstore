@@ -1,0 +1,123 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<br>
+<html>
+    <body onload="Profile()">        
+    </body>
+</html>
+<form onsubmit="Update()">
+<div class="row">
+    <div class="col-md-3"><input type="hidden" id="id" class="form-control"></div>
+    <div class="col-md-2"><label>First Name</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="fname" id="fname" placeholder="First Name" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Last Name</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="lname" id="lname" placeholder="Last Name" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>User Name</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="uname" id="uname" placeholder="User Name" disabled></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Mobile Number</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="mobile" id="mobile" placeholder="Mobile Number" maxlength="10"  pattern="[6-9]{1}[0-9]{9}" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Email Id</label></div>
+    <div class="col-md-3"><input type="email" class="form-control" name="email" id="email" placeholder="Email Id" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Address</label></div>
+    <div class="col-md-3"><textarea id="add" rows="4" class="form-control" required></textarea></div>
+    <div class="col-md-4"></div>
+</div><br>
+
+<div class="row">
+    <div class="col-md-5"></div>
+    <div class="col-md-3"><button type="submit" class="btn btn-info">Update</button></div>
+    <div class="col-md-4"></div>
+</div>
+<br><br></form>
+<script>
+    const id=sessionStorage.getItem("skid");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function Profile() {
+        const getProfilePromise = performAjax("GET", "http://localhost:1234/user/viewProfile");
+        getProfilePromise
+        .then((data) => {
+            const profile = JSON.parse(data).map(record => {
+                return record;
+            });
+            console.log(profile);
+            profile.map(rec => {
+                document.getElementById("id").value=rec._id;
+                document.getElementById("fname").value=rec.firstname;
+                document.getElementById("lname").value=rec.lastname;
+                document.getElementById("uname").value=rec.username;
+                document.getElementById("mobile").value=rec.mobileno;
+                document.getElementById("email").value=rec.emailid;
+                document.getElementById("add").value=rec.address;
+              
+            });
+        })
+        .catch(err => {
+            alert(err.message);
+        })
+    }
+
+    function Update() {
+        event.preventDefault();
+        const id = document.getElementById("id").value;
+        const firstname = document.getElementById("fname").value;
+        const lastname = document.getElementById("lname").value;
+        const username = document.getElementById("uname").value;
+        const mobileno = document.getElementById("mobile").value;
+        const emailid = document.getElementById("email").value;
+        const address = document.getElementById("add").value;
+        const getRegPromise = performAjax(
+            "PUT",
+            `http://localhost:1234/user/updateProfile/${id}`,
+            JSON.stringify({ firstname, lastname, username, mobileno, emailid, address})
+        );
+        getRegPromise
+        .then((regPromise) => {
+            alert('Personal Details Updated Successfully');                
+        })
+        .catch(err => {
+            alert(err.message);
+        })
+    }
+
+</script>

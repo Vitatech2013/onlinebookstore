@@ -1,0 +1,121 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<br>
+<form onsubmit="Register()">
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>First Name</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="fname" id="fname" placeholder="First Name" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Last Name</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="lname" id="lname" placeholder="Last Name" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>User Name</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="uname" id="uname" placeholder="User Name" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Password</label></div>
+    <div class="col-md-3"><input type="Password" class="form-control" name="password" id="password" placeholder="Password" required></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Mobile Number</label></div>
+    <div class="col-md-3"><input type="text" class="form-control" name="mobile" id="mobile" placeholder="Mobile Number" maxlength="10" required pattern="[6-9]{1}[0-9]{9}"></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Email Id</label></div>
+    <div class="col-md-3"><input type="email" class="form-control" name="email" id="email" placeholder="Email Id" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-2"><label>Address</label></div>
+    <div class="col-md-3"><textarea id="add" rows="4" class="form-control" required></textarea></div>
+    <div class="col-md-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-2"><label>Shop Name</label></div>
+    <div class="col-sm-3"><input type="text" name="sname" class="form-control" id="sname" placeholder="enter shop name" required></div>
+    <div class="col-sm-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-2"><label>Branch Name</label></div>
+    <div class="col-sm-3"><input type="text" name="bname" class="form-control" id="bname" placeholder="enter branch name" required></div>
+    <div class="col-sm-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-2"><label>Shop Address</label></div>
+    <div class="col-sm-3"><textarea rows="4" class="form-control" id="sadd" required></textarea> </div>
+    <div class="col-sm-4"></div>
+</div><br>
+<div class="row">
+    <div class="col-md-5"></div>
+    <div class="col-md-3"><button type="submit" class="btn btn-info" >Register</button></div>
+    <div class="col-md-4"></div>
+</div>
+</form>
+<br><br>
+<script>
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function Register() {
+        event.preventDefault();
+        const firstname = document.getElementById("fname").value;
+        const lastname = document.getElementById("lname").value;
+        const username = document.getElementById("uname").value;
+        const password = document.getElementById("password").value;
+        const mobileno = document.getElementById("mobile").value;
+        const emailid = document.getElementById("email").value;
+        const address = document.getElementById("add").value;
+        const shopname = document.getElementById("sname").value;
+        const branch = document.getElementById("bname").value;
+        const shopaddress = document.getElementById("sadd").value;
+        const getRegPromise = performAjax(
+            "POST",
+            `http://localhost:1234/shopkeeper/registration`,
+            JSON.stringify({ firstname, lastname, username, password, mobileno, emailid, address, shopname, branch, shopaddress })
+        );
+        getRegPromise
+        .then((regPromise) => {
+            alert('Registration Successfully Completed');                
+        })
+        .catch(err => {
+            alert(err.message);
+        })
+    }
+
+</script>

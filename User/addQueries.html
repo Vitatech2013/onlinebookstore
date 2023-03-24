@@ -1,0 +1,94 @@
+<html>
+<title>online book store</title>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<body style="font-family:verdena;background-color:#E4E4E6">
+    <br>
+    <form onsubmit="AddQueries()">
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2"><label for="shop name">Shop Name:</label></div>
+        <div class="col-sm-3"><input type="text" name="sname" class="form-control" id="sname" placeholder="enter shop name" required></div>
+        <div class="col-sm-3"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2"><label for="book name">Book Name:</label></div>
+        <div class="col-sm-3"><input type="text" name="bname" class="form-control" id="bname" placeholder="enter book name" required></div>
+        <div class="col-sm-3"></div>
+    </div><br>
+    <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-2"><label for="authorname">Author Name:</label></div>
+            <div class="col-sm-3"><input type="text" name="author" class="form-control" id="author" placeholder="enter book name" required></div>
+            <div class="col-sm-3"></div>
+        </div><br>
+    
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-2"><label for="description">Description:</label></div>
+            <div class="col-sm-3"><textarea col="30" class="form-control" id="discription" required></textarea> </div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-3">
+                  <button type="submit" class="btn btn-success" >Submit</button>
+
+                <button type="reset" class="btn btn-success">Clear</button>
+          </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+    </form>
+</body>
+<script>
+    const username=sessionStorage.getItem("username");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function  AddQueries(){
+        event.preventDefault();
+            const shopname = document.getElementById("sname").value;
+            const bookname = document.getElementById("bname").value;
+            const author = document.getElementById("author").value;
+            const description = document.getElementById("discription").value;
+            const getRegPromise = performAjax(
+                "POST",
+                `http://localhost:1234/user/addQueries`,
+                JSON.stringify({ username, shopname, bookname, author, description})
+            );
+            getRegPromise
+            .then((regPromise) => {
+                alert('Queries Successfully Added');                
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+</script>
+</html>

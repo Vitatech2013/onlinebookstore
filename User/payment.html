@@ -1,0 +1,97 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+<script>
+    const bookid = sessionStorage.getItem("bkid");
+    const username = sessionStorage.getItem('username');
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+    
+    function Payment() {
+        event.preventDefault();
+        const getFilesPromise = performAjax("GET", `http://localhost:1234/user/getBook/${bookid}`);
+        getFilesPromise
+        .then((response) => {
+            const bookData = JSON.parse(response);
+            const getRegPromise = performAjax(
+                "POST",
+                `http://localhost:1234/user/order`,
+                JSON.stringify({ skusername:bookData.username, username, category:bookData.category, subcategory:bookData.subcategory, bookname:bookData.bookname, author:bookData.author, publisher:bookData.publisher, volume:bookData.volume, price:bookData.price, image:bookData.image, file:bookData.file })
+            );
+            getRegPromise
+            .then((regPromise) => {
+                alert('Amount Paid Successfully'); 
+                window.location.href = "user";               
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+        })
+        .catch(err => {
+            alert(err.message);
+        })        
+    }
+ 
+</script>
+<html>
+    <body>
+        <br>
+       <form onsubmit="Payment()">         
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"><label for="search">Card Type</label></div>
+            <div class="col-sm-3">
+                <select value="" id="cardtype" class="form-control" required>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>  
+                </select>
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+                <div class="col-sm-4"></div>
+                <div class="col-sm-1"><label for="new password">Card Number</label></div>
+                <div class="col-sm-3"><input type="text" class="form-control" placeholder="16 Digit Number" required></div>
+                <div class="col-sm-4"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-4"></div>
+                <div class="col-sm-1"><label for="confirm password">Cvv Number</label></div>
+                <div class="col-sm-3"><input type="text" class="form-control" placeholder="3 Digit Number" required></div>
+                <div class="col-sm-4"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-4"></div>
+                <div class="col-sm-1"><label for="confirm password">Expire Date</label></div>
+                <div class="col-sm-3"><input type="date" class="form-control" required></div>
+                <div class="col-sm-4"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-5"></div>
+                <div class="col-sm-3">
+                      <button type="submit"  class="btn btn-success">Submit</button>                   
+              </div>
+                <div class="col-sm-4"></div>
+            </div><br>
+           </form>
+    </body>
+</html>

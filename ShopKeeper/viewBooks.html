@@ -1,0 +1,216 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+<html>
+    <style>
+        .tablecss {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif; border-collapse: collapse; width: 98%;
+        }
+        .tablecss td, .tablecss th {
+            border: 1px solid #ddd; padding: 8px;
+        }
+        .tablecss tr:nth-child(odd){ background-color: #f2f2f2; }
+        .tablecss tr:hover { background-color: #ddd; }
+        .tablecss th {
+            padding-top: 12px; padding-bottom: 12px; text-align: center; background-color: lavender; color: black; font-weight: bold;
+        }
+    </style>
+    <body onload="loadData()">
+        <center>
+            <h3>Books</h3>
+            <table id="data" class="tablecss"></table>
+            <br><br><br>
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content" style="background-color:lavender;border-radius: 10px">
+                        <div class="modal-header" style="background-color:white;border-radius :10px">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h3 style="color:black;text-align:center">Books Details</h3>
+                        </div>
+                        <div class="modal-body">
+                <form onsubmit="UpdateBook()">
+            <div class="row">
+                <div class="col-sm-1"><input type="hidden" class="form-control" id="id"></div>
+                <div class="col-sm-3"><label>Category</label>
+                    <select id="category" class="form-control" required>
+                        <option value="">--Select--</option>
+                        <option value="Engineering Books">Engineering Books</option>
+                        <option value="Novels">Novels</option>
+                    </select>
+                </div>
+                <div class="col-sm-3"><label>Sub Category</label>
+                    <select id="subcategory" class="form-control" required>
+                        <option value="">--Select--</option>
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="Stories">Stories</option>
+                    </select>
+                </div>
+                <div class="col-sm-3"><label>Book Name</label>
+                    <input type="text" id="title" class="form-control" placeholder="Book Name" required></div>
+                <div class="col-sm-1"></div>
+            </div><br>
+            
+            <div class="row">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-3"><label>Author</label>
+                    <input type="text" id="author" class="form-control" placeholder="Author Name" required>
+                </div>
+                <div class="col-sm-3"><label>Publisher</label>
+                    <input type="text" id="publisher" class="form-control" placeholder="Publisher Name" required>
+                </div>
+                <div class="col-sm-3"><label>Volume</label>
+                    <input type="text" id="volume" class="form-control" placeholder="Volume" required></div>    
+                <div class="col-sm-1"></div>
+            </div><br>
+            
+            <div class="row">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-3"> <label>Select Type</label>
+                    <select id="type" class="form-control">
+                        <option value="">--Select--</option>
+                        <option value="Free">Free</option>
+                        <option value="Cost">Cost</option>
+                    </select>
+                </div>
+                <div class="col-sm-3"><label>Price</label>
+                    <input type="number" id="price" class="form-control" placeholder="Price" required>
+                </div>            
+                <div class="col-sm-2"><label>Upload Book</label>
+                    <input type="file" id="bimage" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+                </div>
+                <div class="col-sm-2"><label>Upload Image</label>
+                    <input type="file" id="bfile" accept="image/*" required>
+                </div>
+            </div><br><br>
+            <div class="row">
+                <div class="col-sm-5"></div>
+                <div class="col-sm-3">
+                    <button type="submit" class="btn btn-success" >UpdateBook</button>
+                </div>
+                <div class="col-sm-4"></div>
+            </div><br></form>
+        </center>
+    </body>
+</html>
+<script>
+    const username=sessionStorage.getItem("skuname");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function loadData() {
+        const getUsersPromise = performAjax("GET", `http://localhost:1234/shopkeeper/viewBooks?username=${username}`);
+        getUsersPromise
+        .then((response) => {
+            showData(response);
+        })
+        .catch(err => {
+            alert(err.message);
+        })
+    }
+
+    function showData(data) {
+        const records = JSON.parse(data);
+        let tableRow = '';
+        const tableHeader = `<tr style="background: lavender;"><th>S.No.</th><th>Shop Keeper</th><th>Category</th><th>Sub-Category</th><th>Book Name</th><th>author</th><th>Publisher</th><th>Volume</th><th>Price</th><th>Type</th><th>Image</th><th>Download</th><th>Actions</th></tr>`;
+        if(records.length > 0) {
+            tableRow = records.map((rec, index) => {
+                const downloadButton = `<a class="glyphicon glyphicon-download" style="color:blue; font-size:22px;" onclick="downloadDoc('${rec._id}')"></a>`;
+                const editButton = `<a id="${rec._id}" onclick="editBooks('${rec._id}','${rec.username}','${rec.category}','${rec.subcategory}','${rec.bookname}','${rec.author}','${rec.publisher}','${rec.volume}','${rec.price}','${rec.type}')" style="color:green"  class="glyphicon glyphicon-pencil"></a>`;
+                const deleteButton = `<a id="${rec._id}" onclick="deleteBooks(event)" style="color:red" class="glyphicon glyphicon-trash"></a>`;
+                return `<tr><td align="right">${index + 1}</td><td>${rec.username}</td><td>${rec.category}</td><td>${rec.subcategory}</td><td>${rec.bookname}</td><td>${rec.author}</td><td>${rec.publisher}</td><td>${rec.volume}</td><td>${rec.price}</td><td>${rec.type}</td><td><img src='${rec.image}' height="80px" width="100"></td><td>${downloadButton}</td><td>${editButton}&nbsp;&nbsp;${deleteButton}</td></tr>`;
+            });
+            document.getElementById("data").innerHTML = `${tableHeader}${tableRow.join('')}`;
+        }
+        else {
+            tableRow = `<tr><td colspan="13" align="center">No Data Found</td></tr>`;
+            document.getElementById("data").innerHTML = `${tableHeader}${tableRow}`;
+        }                
+    }
+
+    function downloadDoc(id) {
+        const getFilesPromise = performAjax("GET", `http://localhost:1234/shopkeeper/download/${id}`);
+        getFilesPromise
+            .then((response) => {
+                window.open(JSON.parse(response).file);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function editBooks(id,username,category,subcategory,bookname,author,publisher,volume,price,type)
+    {
+        $("#myModal").modal();
+            document.getElementById("id").value = id;
+            document.getElementById("category").value = category;
+            document.getElementById("subcategory").value = subcategory;
+            document.getElementById("title").value = bookname;
+            document.getElementById("author").value = author;
+            document.getElementById("publisher").value = publisher;
+            document.getElementById("volume").value = volume;
+            document.getElementById("price").value = price;
+            document.getElementById("type").value = type;
+        }
+    function  UpdateBook(){
+        event.preventDefault();
+        const id = document.getElementById("id").value;
+        const category = document.getElementById("category").value;
+        const subcategory = document.getElementById("subcategory").value;
+        const bookname = document.getElementById("title").value;
+        const author = document.getElementById("author").value;
+        const publisher = document.getElementById("publisher").value;
+        const volume = document.getElementById("volume").value;
+        const type = document.getElementById("type").value;
+        const price = document.getElementById("price").value;
+        const getRegPromise = performAjax(
+                        "PUT",
+                        `http://localhost:1234/shopkeeper/updateBook/${id}`,
+                        JSON.stringify({category, subcategory, bookname, author, publisher, volume, type, price})
+                    );
+                    getRegPromise
+                    .then((regPromise) => {
+                        alert('BooksUpdate Successfully');                
+                    })
+                    .catch(err => {
+                        alert(err.message);
+                    })
+
+    }
+   function deleteBooks(event){
+    event.preventDefault();
+        let result = confirm("Are you sure you want to delete?");
+        if (result) {
+            const deletePromise = performAjax('DELETE', `http://localhost:1234/shopkeeper/deleteBook/${event.target.id}`);
+            deletePromise
+                .then((books) => {
+                    loadData(books);
+                })
+                .catch(err => {
+                    alert(err.message);
+                })
+        }
+
+    }
+
+
+</script>

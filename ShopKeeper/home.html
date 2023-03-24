@@ -1,0 +1,79 @@
+<html>
+<title>Online Book Store</title>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<style>
+  a span:hover {
+      color: greenyellow;
+  }
+
+  .navbar {
+      margin-bottom: 0;
+      background-color: #943126  ;
+      z-index: 9999;
+      border: 0;
+      font-size: 12px !important;
+      line-height: 1.42857143 !important;
+      letter-spacing: 1px;
+      border-radius: 0;
+      font-family: Montserrat, sans-serif;
+  }
+
+  .navbar li a,
+  .navbar .navbar-brand {
+      color: #fff !important;
+  }
+
+  .navbar-nav li a:hover,
+  .navbar-nav li.active a {
+      color: #f4511e !important;
+      background-color: #fff !important;
+  }
+
+  .navbar-default .navbar-toggle {
+      border-color: transparent;
+      color: #fff !important;
+  }
+</style>
+<body style="font-family:verdena;background-color:#E4E4E6">
+  <div style="background-color:#E4E4E6; height:13%; text-align: center; margin-top: 0px;">
+      <br>
+      <h3 style="top: 50%; transform: translateY(-50%);color:#04276D">ONLINE BOOK STORE</h3>
+  </div>
+  <nav class="navbar navbar-default navbar">
+    <div class="container">
+      <div class="navbar-header ">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#myPage"><img src="/img.png" class="img-responsive" style="border-radius:50%;width:40px;height:30px"></a>
+      </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right" style="font-size: 15px;">
+          <li><a class="nav-link" href="http://localhost:4567/shopkeeper">Home</a></li>
+          <li><a class="nav-link" href="http://localhost:4567/shopkeeper/viewProfile" target="iframe">Profile</a></li>
+          <li><a class="nav-link" href="http://localhost:4567/shopkeeper/viewUsers" target="iframe">View Users</a></li>
+          <li><a class="nav-link" href="http://localhost:4567/shopkeeper/addBooks" target="iframe">Add Books</a></li>
+          <li><a class="nav-link" href="http://localhost:4567/shopkeeper/viewBooks" target="iframe">View Books</a></li>
+          <!-- <li><a class="nav-link" href="http://localhost:4567/shopkeeper/orderBooks" target="iframe">Order Books</a></li> -->
+          <li><a class="nav-link" href="http://localhost:4567/shopkeeper/viewQueries" target="iframe">View Queries</a></li>
+          <li><a class="nav-link" href="http://localhost:4567/shopkeeper/ChangePassword" target="iframe">ChangePassword</a></li>
+
+          <li><a class="nav-link" href="http://localhost:4567/">LogOut</a></li>
+      </ul>
+    </div>
+  </nav>
+  <center>
+    <iframe src="" name="iframe" id="iframe" style="width: 98%; min-height: 550px; border: none;"></iframe>
+  </center>
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+<html>
+<title>online book store</title>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  <style>
+    .form-control {
+        border-radius: 15px;
+    }
+
+    .tablecss {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 95%;
+    }
+
+    .tablecss td,
+    .tablecss th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .tablecss tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .tablecss tr:hover {
+        background-color: #ddd;
+    }
+
+    .tablecss th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: center;
+        background-color: lavender;
+        color: black;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+   const username=sessionStorage.getItem("username");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function searchBooks() {
+        event.preventDefault();
+        const bookname = document.getElementById("bookname").value;
+        const searchPromise = performAjax(
+            "GET",
+            `http://localhost:1234/user/searchBooks?bookname=${bookname}&author=${bookname}`
+        );
+        searchPromise
+        .then((response) => {            
+            const data = JSON.parse([response]);
+            ViewBookDetails(data);            
+        })
+        .catch(err => {
+            alert(err.message);
+        })
+    }
+ 
+    function ViewBookDetails(records) {
+        const tableHeader = `<tr style="background: lavender;"><th>S.No.</th><th>Shop Keeper</th><th>Category</th><th>Sub-Category</th><th>Book Name</th><th>author</th><th>Publisher</th><th>Volume</th><th>Price</th><th>Type</th><th>Image</th><th>Download</th></tr>`;
+        if (records.length > 0) {
+            let tableRow = records.map((rec, index) => {  
+                const downloadButton = `<a class="glyphicon glyphicon-download" style="color:blue; font-size:22px;" onclick="downloadDoc('${rec._id}', '${rec.type}')"></a>`;                           
+                const favButton = `<a class="glyphicon glyphicon-bookmark" style="color:blue; font-size:22px;" onclick="favourate('${rec.bookname}', '${rec.author}', '${rec.publisher}', '${rec.volume}', '${rec.image}')"></a>`;                           
+                return `<tr><td align="right">${index + 1}</td><td>${rec.username}</td><td>${rec.category}</td><td>${rec.subcategory}</td><td>${rec.bookname}</td><td>${rec.author}</td><td>${rec.publisher}</td><td>${rec.volume}</td><td>${rec.price}</td><td>${rec.type}</td><td><img src='${rec.image}' height="80px" width="100"></td><td>${downloadButton}&nbsp;&nbsp;${favButton}</td></tr>`;
+            });
+            document.getElementById("viewtable").innerHTML = `<table  class="scripted table" border="2">${tableHeader}${tableRow.join('')}</table>`;
+        }
+
+        else {
+            tableRow = `<tr><td colspan="14" align="center">No Data Found</td></tr>`;
+            document.getElementById("viewtable").innerHTML = `${tableHeader}${tableRow}`;
+        }
+    }
+
+    function downloadDoc(id, type) {
+        if(type === "Free") {
+            const getFilesPromise = performAjax("GET", `http://localhost:1234/user/getBook/${id}`);
+            getFilesPromise
+                .then((response) => {
+                    window.open(JSON.parse(response).file);
+                })
+                .catch(err => {
+                    alert(err.message);
+                })
+        } 
+        else {
+            sessionStorage.setItem("bkid", id);
+            window.location.href = "payment";
+        }
+        
+    }
+
+    function favourate(bookname, author, publisher, volume, image) {
+        const getRegPromise = performAjax(
+            "POST",
+            `http://localhost:1234/user/addFavourite`,
+            JSON.stringify({ username, bookname, author, publisher, volume, image })
+        );
+        getRegPromise
+        .then((regPromise) => {
+            alert('Successfully Added');                
+        })
+        .catch(err => {
+            alert(err.message);
+        })
+    }
+
+</script>
+</head>
+<body style="font-family:verdena;background-color:#E4E4E6">
+    <br>
+    <form onsubmit="searchBooks()">
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2 text-right"><label>Book Name/Author Name</label></div>
+        <div class="col-sm-3"><input type="text" name="txt" class="form-control" id="bookname" placeholder="Enter Book Name (or) Author Name" required></div>
+        <div class="col-sm-3"></div>
+    </div><br>
+        <div class="col-sm-4"></div>
+    </div><br>
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2"><button type="submit"  class="btn btn-success">Search</button>
+          </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+       <br>
+       <center>
+        <table id=viewtable border="1" class="tablecss" style="width: 1000px;"></table>
+    </center></form>
+</body>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<br>
+<form onsubmit="AddBook()">
+<div class="row">
+    <div class="col-sm-1"></div>
+    <div class="col-sm-3"><label>Category</label>
+        <select id="category" class="form-control" required>
+            <option value="">--Select--</option>
+            <option value="Engineering Books">Engineering Books</option>
+            <option value="Novels">Novels</option>
+        </select>
+    </div>
+    <div class="col-sm-3"><label>Sub Category</label>
+        <select id="subcategory" class="form-control" required>
+            <option value="">--Select--</option>
+            <option value="CSE">CSE</option>
+            <option value="ECE">ECE</option>
+            <option value="Stories">Stories</option>
+        </select>
+    </div>
+    <div class="col-sm-3"><label>Book Name</label>
+        <input type="text" id="title" class="form-control" placeholder="Book Name" required></div>
+    <div class="col-sm-1"></div>
+</div><br>
+
+<div class="row">
+    <div class="col-sm-1"></div>
+    <div class="col-sm-3"><label>Author</label>
+        <input type="text" id="author" class="form-control" placeholder="Author Name" required>
+    </div>
+    <div class="col-sm-3"><label>Publisher</label>
+        <input type="text" id="publisher" class="form-control" placeholder="Publisher Name" required>
+    </div>
+    <div class="col-sm-3"><label>Volume</label>
+        <input type="text" id="volume" class="form-control" placeholder="Volume" required></div>    
+    <div class="col-sm-1"></div>
+</div><br>
+
+<div class="row">
+    <div class="col-sm-1"></div>
+    <div class="col-sm-3"> <label>Select Type</label>
+        <select id="type" class="form-control" required>
+            <option value="">--Select--</option>
+            <option value="Free">Free</option>
+            <option value="Cost">Cost</option>
+        </select>
+    </div>
+    <div class="col-sm-3"><label>Price</label>
+        <input type="number" id="price" class="form-control" placeholder="Price" required>
+    </div>            
+    <div class="col-sm-2"><label>Upload Book</label>
+        <input type="file" id="bimage" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+    </div>
+    <div class="col-sm-2"><label>Upload Image</label>
+        <input type="file" id="bfile" accept="image/*" required>
+    </div>
+</div><br><br>
+<div class="row">
+    <div class="col-sm-5"></div>
+    <div class="col-sm-3">
+        <button type="submit" class="btn btn-success">Add Book</button>
+    </div>
+    <div class="col-sm-4"></div>
+</div><br></form>
+<script>
+    const username = sessionStorage.getItem("skuname");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function AddBook() {
+        event.preventDefault();
+        const category = document.getElementById("category").value;
+        const subcategory = document.getElementById("subcategory").value;
+        const bookname = document.getElementById("title").value;
+        const author = document.getElementById("author").value;
+        const publisher = document.getElementById("publisher").value;
+        const volume = document.getElementById("volume").value;
+        const type = document.getElementById("type").value;
+        const price = document.getElementById("price").value;
+        const images = document.getElementById("bimage").files;
+        const files = document.getElementById("bfile").files;
+
+        if (images.length > 0 && files.length > 0) {
+            var imageToLoad = images[0];
+            var fielToLoad = files[0];
+            var imageReader = new FileReader();
+            var fileReader = new FileReader();
+            imageReader.onload = function (imageLoadedEvent) {
+                const image = imageLoadedEvent.target.result;
+
+                fileReader.onload = function (fileLoadedEvent) {
+                    const file = fileLoadedEvent.target.result;
+
+                    const getRegPromise = performAjax(
+                        "POST",
+                        `http://localhost:1234/shopkeeper/addBooks`,
+                        JSON.stringify({ username, category, subcategory, bookname, author, publisher, volume, type, price, image, file })
+                    );
+                    getRegPromise
+                    .then((regPromise) => {
+                        alert('Book Stored Successfully');                
+                    })
+                    .catch(err => {
+                        alert(err.message);
+                    })
+                }
+                fileReader.readAsDataURL(imageToLoad);
+            }
+            imageReader.readAsDataURL(fielToLoad);
+        }
+    }
+
+</script>
